@@ -64,3 +64,7 @@ can rule steps 1–4 in or out in seconds, without redeploying anything.
 Part of the [Errant Solutions](https://errant.solutions) spare-capacity
 toolkit — free to use, pay-what-you-want if it saved you time:
 https://errant.solutions
+
+## License
+
+MIT — see LICENSE.
