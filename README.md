@@ -43,7 +43,12 @@ python3 webhook_sig_verifier.py --scheme generic-sha256 \
     --signature "abcdef..."
 ```
 
-Exit code `0` = valid, `1` = invalid (mismatched), `2` = usage error.
+Exit code `0` = valid, `1` = invalid (mismatched), `2` = usage error (e.g. Slack
+without `--timestamp`, both `--payload` and `--payload-file`, unreadable file).
+
+`--tolerance N` sets the replay window in seconds for the Stripe/Slack timestamp
+warning (default 300, both providers' default). Stripe headers carrying several `v1=`
+values (sent while you roll a signing secret) validate if any one matches. Python 3.8+.
 
 Read the payload from a file with `--payload-file exact-body.json` to
 guarantee byte-for-byte fidelity (whitespace/encoding differences are the

@@ -32,6 +32,8 @@ Usage:
         --payload-file payload.json \
         --signature "abcdef..."
 
+With neither --payload nor --payload-file, the payload is read from stdin.
+
 Exit code 0 = signature valid, 1 = invalid, 2 = usage error.
 """
 import argparse
@@ -60,7 +62,7 @@ def verify_github(payload: bytes, secret: str, signature: str):
     digestmod = hashlib.sha256 if algo == "sha256" else hashlib.sha1
     mac = hmac.new(secret.encode("utf-8"), payload, digestmod)
     expected = mac.hexdigest()
-    ok = hmac.compare_digest(expected, sig_hex)
+    ok = hmac.compare_digest(expected, sig_hex.strip().lower())
     return ok, f"computed {algo}={expected}"
 
 
@@ -70,9 +72,11 @@ def verify_stripe(payload: bytes, secret: str, signature: str, tolerance: int = 
     signing secret, compared against the v1 value(s). Also flags timestamp
     tolerance violations (Stripe recommends rejecting signatures where the
     timestamp is more than 5 minutes from now, to block replay attacks)."""
-    parts = dict(p.split("=", 1) for p in signature.split(",") if "=" in p)
-    ts = parts.get("t")
-    v1s = [v for k, v in parts.items() if k == "v1"]
+    # Keep every pair: during a secret roll Stripe sends several v1= values in one
+    # header, and any one of them matching is a valid signature.
+    pairs = [p.strip().split("=", 1) for p in signature.split(",") if "=" in p]
+    ts = next((v for k, v in pairs if k == "t"), None)
+    v1s = [v.strip().lower() for k, v in pairs if k == "v1"]
     if not ts or not v1s:
         return False, "malformed signature: expected 't=...,v1=...'"
     signed_payload = f"{ts}.".encode("utf-8") + payload
@@ -99,11 +103,10 @@ def verify_slack(payload: bytes, secret: str, signature: str, timestamp: str, to
         return False, "Slack scheme requires --timestamp (from X-Slack-Request-Timestamp header)"
     if not signature.startswith("v0="):
         return False, "malformed signature: expected 'v0=<hex>'"
-    sig_hex = signature[len("v0="):]
     base = f"v0:{timestamp}:".encode("utf-8") + payload
     mac = hmac.new(secret.encode("utf-8"), base, hashlib.sha256)
     expected = f"v0={mac.hexdigest()}"
-    ok = hmac.compare_digest(expected, signature)
+    ok = hmac.compare_digest(expected, signature.strip().lower())
     notes = [f"computed {expected}"]
     try:
         age = abs(time.time() - int(timestamp))
@@ -120,7 +123,7 @@ def verify_slack(payload: bytes, secret: str, signature: str, timestamp: str, to
 def verify_generic(payload: bytes, secret: str, signature: str, digestmod):
     mac = hmac.new(secret.encode("utf-8"), payload, digestmod)
     expected = mac.hexdigest()
-    ok = hmac.compare_digest(expected, signature.strip())
+    ok = hmac.compare_digest(expected, signature.strip().lower())
     return ok, f"computed {digestmod().name}={expected}"
 
 
@@ -136,8 +139,15 @@ def main():
     p.add_argument("--timestamp", help="Required for --scheme slack (X-Slack-Request-Timestamp)")
     p.add_argument("--tolerance", type=int, default=300, help="Replay tolerance in seconds (default 300, Stripe/Slack default)")
     args = p.parse_args()
+    if args.scheme == "slack" and not args.timestamp:
+        p.error("--scheme slack requires --timestamp (the X-Slack-Request-Timestamp header)")
+    if args.payload is not None and args.payload_file:
+        p.error("use either --payload or --payload-file, not both")
 
-    payload = read_payload(args)
+    try:
+        payload = read_payload(args)
+    except OSError as e:
+        p.error(f"can't read --payload-file: {e}")
 
     if args.scheme == "github":
         ok, note = verify_github(payload, args.secret, args.signature)
