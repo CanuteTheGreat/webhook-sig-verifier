@@ -101,7 +101,8 @@ class TestHmacSchemes(unittest.TestCase):
                 "other secret": dict(secret=(SW_SECRET[:-6] + "AAAAA=") if scheme == "standard-webhooks"
                                      else SECRET + "x"),
                 "signature truncated": dict(sig=good[:-2]),
-                "signature char changed": dict(sig=good[:-3] + ("A" if good[-3] != "A" else "B") + good[-2:]),
+                # a different character even after the case-insensitive hex comparison
+                "signature char changed": dict(sig=good[:-3] + ("0" if good[-3].lower() != "0" else "1") + good[-2:]),
             }
             if scheme in ("stripe", "slack", "zoom", "standard-webhooks"):
                 tampered["other timestamp"] = dict(ts=str(now - 1), sig_ts=ts)
