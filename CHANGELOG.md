@@ -2,6 +2,11 @@
 
 All notable changes. Versions are git tags; each tag has a Forgejo release with checksums.
 
+## Unreleased
+
+- CI now runs on Python 3.7 (the README's and pyproject's minimum; it ran 3.8 while the README said 3.7).
+- Tests: accuracy suite (every scheme x every tampering, RFC 8032 Ed25519 vectors, 40 random Ed25519 keys against OpenSSL, the malleable S+L form), mutation testing (nightly), claims ledger.
+
 ## 1.2.0 - 2026-10-16
 
 - New schemes: **Standard Webhooks** (Svix and others: `v1,` HMAC-SHA256 with `whsec_` secrets and `v1a,`

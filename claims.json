@@ -1,0 +1,220 @@
+{
+ "offline": true,
+ "optional_imports": [],
+ "hidden_options": [],
+ "claims": [
+  {
+   "id": "github",
+   "text": "| `github` | `X-Hub-Signature-256` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestGitHub::test_documented_example_valid",
+    "tests/test_webhook_sig_verifier.py::TestGitHub::test_legacy_sha1",
+    "tests/test_webhook_sig_verifier.py::TestGitHub::test_wrong_secret_or_changed_body_invalid",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ],
+   "flags": [
+    "--scheme",
+    "--secret",
+    "--signature"
+   ]
+  },
+  {
+   "id": "stripe",
+   "text": "| `stripe` | `Stripe-Signature` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestStripe::test_fresh_signature_valid_and_matches_stripe_library",
+    "tests/test_webhook_sig_verifier.py::TestStripe::test_secret_roll_multiple_v1_values",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ]
+  },
+  {
+   "id": "slack",
+   "text": "| `slack` | `X-Slack-Signature` + `X-Slack-Request-Timestamp` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestSlack::test_valid_signature_from_slack_sdk",
+    "tests/test_webhook_sig_verifier.py::TestSlack::test_timestamp_is_part_of_the_signature",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ],
+   "flags": [
+    "--timestamp"
+   ]
+  },
+  {
+   "id": "zoom",
+   "text": "| `zoom` | `x-zm-signature` + `x-zm-request-timestamp` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestBase64Providers::test_zoom",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ]
+  },
+  {
+   "id": "shopify",
+   "text": "| `shopify` | `X-Shopify-Hmac-Sha256` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestBase64Providers::test_shopify",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ]
+  },
+  {
+   "id": "square",
+   "text": "| `square` | `x-square-hmacsha256-signature` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestBase64Providers::test_square",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ],
+   "flags": [
+    "--url"
+   ]
+  },
+  {
+   "id": "twilio",
+   "text": "| `twilio` | `X-Twilio-Signature` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestBase64Providers::test_twilio_form_and_json_bodies_match_official_validator"
+   ]
+  },
+  {
+   "id": "standard-webhooks",
+   "text": "| `standard-webhooks` | `webhook-id`, `webhook-timestamp`, `webhook-signature` |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestStandardWebhooks::test_published_example",
+    "tests/test_webhook_sig_verifier.py::TestStandardWebhooks::test_matches_official_library",
+    "tests/test_webhook_sig_verifier.py::TestStandardWebhooks::test_ed25519_v1a",
+    "tests/test_accuracy.py::TestEd25519::test_rfc8032_vectors",
+    "tests/test_accuracy.py::TestEd25519::test_against_openssl_random",
+    "tests/test_accuracy.py::TestEd25519::test_cli_v1a_end_to_end"
+   ],
+   "flags": [
+    "--webhook-id"
+   ]
+  },
+  {
+   "id": "generic",
+   "text": "| `generic-sha256` / `generic-sha1` / `generic-sha512` | any |",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestGenericAndInput::test_generic_sha256_and_sha1",
+    "tests/test_webhook_sig_verifier.py::TestBase64Providers::test_generic_base64_and_sha512",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ],
+   "flags": [
+    "--encoding"
+   ]
+  },
+  {
+   "id": "stale",
+   "text": "Stale timestamps (Stripe, Slack, Zoom, Standard Webhooks) are flagged",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestStripe::test_stale_timestamp_warns_and_tolerance_option",
+    "tests/test_webhook_sig_verifier.py::TestSlack::test_stale_timestamp_and_tolerance",
+    "tests/test_accuracy.py::TestHmacSchemes::test_stale_genuine_signature_is_valid_with_warning"
+   ],
+   "flags": [
+    "--tolerance"
+   ]
+  },
+  {
+   "id": "stdlib-only",
+   "text": "Zero dependencies beyond the Python standard library (Ed25519 is verified with a\npure-Python RFC 8032 implementation)",
+   "tests": [
+    "tests/test_claims.py::TestClaims::test_stdlib_only",
+    "tests/test_accuracy.py::TestEd25519::test_rfc8032_vectors"
+   ]
+  },
+  {
+   "id": "offline",
+   "text": "Nothing is sent anywhere",
+   "tests": [
+    "tests/test_claims.py::TestClaims::test_offline_claim"
+   ]
+  },
+  {
+   "id": "exit-codes",
+   "text": "Exit code `0` = valid, `1` = invalid (mismatched), `2` = usage error",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestGenericAndInput::test_usage_errors_exit_2",
+    "tests/test_accuracy.py::TestHmacSchemes::test_matrix"
+   ]
+  },
+  {
+   "id": "json",
+   "text": "`--json` prints",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestJsonAndVersion::test_json"
+   ],
+   "flags": [
+    "--json"
+   ]
+  },
+  {
+   "id": "payload-input",
+   "text": "Read the payload from a file with `--payload-file exact-body.json`",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestGenericAndInput::test_payload_from_stdin_is_exact_bytes",
+    "tests/test_webhook_sig_verifier.py::TestGenericAndInput::test_payload_file_keeps_exact_bytes"
+   ],
+   "flags": [
+    "--payload-file",
+    "--payload"
+   ]
+  },
+  {
+   "id": "version-help",
+   "text": "--version",
+   "tests": [
+    "tests/test_webhook_sig_verifier.py::TestJsonAndVersion::test_version",
+    "tests/test_claims.py::TestClaims::test_readme_options_exist"
+   ],
+   "flags": [
+    "--version",
+    "--help"
+   ]
+  },
+  {
+   "id": "install-pipx",
+   "text": "pipx install git+https://git.canutethegreat.com/CanuteTheGreat/webhook-sig-verifier.git",
+   "tests": [
+    "ci/install-channels.sh#pipx install -q \"git+$FORGEJO/CanuteTheGreat/$REPO.git\"",
+    ".forgejo/workflows/nightly.yml#ci/install-channels.sh"
+   ]
+  },
+  {
+   "id": "install-homebrew",
+   "text": "brew install canutethegreat/errant-tools/webhook-sig-verifier",
+   "tests": [
+    "repo:homebrew-errant-tools/Formula/webhook-sig-verifier.rb#test do",
+    "repo:homebrew-errant-tools/.forgejo/workflows/test.yml#ci/run-tests.sh"
+   ]
+  },
+  {
+   "id": "install-scoop",
+   "text": "scoop install errant-tools/webhook-sig-verifier",
+   "tests": [
+    "repo:scoop-errant-tools/bucket/webhook-sig-verifier.json#\"bin\"",
+    "repo:scoop-errant-tools/.forgejo/workflows/test.yml#ci/run-tests.sh"
+   ]
+  },
+  {
+   "id": "install-download",
+   "text": "https://errant.solutions/downloads/webhook_sig_verifier.py",
+   "tests": [
+    "ci/install-channels.sh#https://errant.solutions/downloads/$FILE"
+   ]
+  },
+  {
+   "id": "release-assets",
+   "text": "`SHA256SUMS` file",
+   "tests": [
+    "ci/install-channels.sh#sha256sum -c SHA256SUMS",
+    "ci/release.py#SHA256SUMS"
+   ]
+  },
+  {
+   "id": "python-versions",
+   "text": "Python 3.7+",
+   "tests": [
+    ".forgejo/workflows/test.yml#python: [\"3.7",
+    ".forgejo/workflows/nightly.yml#python: [\"3.7"
+   ]
+  }
+ ]
+}
