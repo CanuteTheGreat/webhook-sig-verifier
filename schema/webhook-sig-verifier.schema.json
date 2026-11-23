@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "webhook-sig-verifier --json output (schema_version 1)",
+  "type": "object",
+  "required": ["schema_version", "tool", "version", "exit_code", "scheme", "valid", "notes", "warnings", "payload_bytes"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "tool": {"type": "string", "const": "webhook-sig-verifier"},
+    "version": {"type": "string"},
+    "exit_code": {"type": "integer", "enum": [0, 1]},
+    "scheme": {"type": "string"},
+    "valid": {"type": "boolean"},
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "payload_bytes": {"type": "integer", "minimum": 0}
+  }
+}

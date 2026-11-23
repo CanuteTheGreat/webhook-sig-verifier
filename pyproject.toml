@@ -40,11 +40,11 @@ path = "webhook_sig_verifier.py"
 only-include = ["webhook_sig_verifier.py"]
 
 [tool.hatch.build.targets.sdist]
-only-include = ["webhook_sig_verifier.py", "README.md", "LICENSE", "CHANGELOG.md", "tests", "claims.json"]
+only-include = ["webhook_sig_verifier.py", "README.md", "LICENSE", "CHANGELOG.md", "tests", "claims.json", "schema", "docs"]
 
 [tool.mutmut]
 # ci/mutation.sh (nightly workflow)
 source_paths = ["webhook_sig_verifier.py"]
 pytest_add_cli_args_test_selection = ["tests/"]
-also_copy = ["claims.json", "ci", "README.md", "CHANGELOG.md"]
+also_copy = ["claims.json", "schema", "ci", "README.md", "CHANGELOG.md"]
 

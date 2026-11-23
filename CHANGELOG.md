@@ -7,6 +7,13 @@ All notable changes. Versions are git tags; each tag has a Forgejo release with 
 - CI now runs on Python 3.7 (the README's and pyproject's minimum; it ran 3.8 while the README said 3.7).
 - Tests: accuracy suite (every scheme x every tampering, RFC 8032 Ed25519 vectors, 40 random Ed25519 keys against OpenSSL, the malleable S+L form), mutation testing (nightly), claims ledger.
 
+## 1.3.0 - 2026-11-23
+
+- Shared CLI contract across the Errant Solutions tools ([docs/CLI-CONTRACT.md](docs/CLI-CONTRACT.md)): exit 0 clean, 1 findings, 2 usage/input error, 3 unexpected runtime error (an uncaught exception used to be a traceback with exit 1). Exit codes this tool already documented for other cases are kept and marked legacy in the README.
+- New `--quiet` / `-q`: no stdout, exit code only (errors stay on stderr).
+- `--json` now carries `schema_version` (1), `tool` and `exit_code` next to the existing keys (nothing removed or renamed).
+- The JSON Schema of the `--json` output is in `schema/`; contract tests (exit codes, JSON against the schema, quiet, stderr) run on every push, and the push trigger now covers every branch.
+
 ## 1.2.0 - 2026-10-16
 
 - New schemes: **Standard Webhooks** (Svix and others: `v1,` HMAC-SHA256 with `whsec_` secrets and `v1a,`

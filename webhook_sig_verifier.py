@@ -37,9 +37,11 @@ Usage:
 
 With neither --payload nor --payload-file, the payload is read from stdin.
 
-Exit code 0 = signature valid, 1 = invalid, 2 = usage error.
+Exit codes (shared CLI contract, docs/CLI-CONTRACT.md): 0 = signature valid, 1 = invalid,
+2 = usage or input error, 3 = unexpected runtime error. --json prints one object with
+schema_version, tool, version and exit_code; --quiet prints nothing on stdout.
 """
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 import argparse
 import base64
@@ -300,6 +302,15 @@ VERIFIERS = {
 
 
 def main(argv=None):
+    """Entry point. Any unexpected exception is a runtime error (exit 3), never a bare traceback exit 1."""
+    try:
+        return _main(argv)
+    except Exception as exc:  # SystemExit (argparse usage errors, exit 2) is not an Exception
+        print("webhook-sig-verifier: error: %s: %s" % (type(exc).__name__, exc), file=sys.stderr)
+        return 3
+
+
+def _main(argv=None):
     p = argparse.ArgumentParser(prog="webhook-sig-verifier", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--version", action="version", version="%(prog)s " + __version__)
@@ -317,6 +328,8 @@ def main(argv=None):
     p.add_argument("--tolerance", type=int, default=300,
                    help="Replay tolerance in seconds (default 300, the providers' default)")
     p.add_argument("--json", action="store_true", help="machine-readable JSON result")
+    p.add_argument("-q", "--quiet", action="store_true",
+                   help="print nothing on stdout; the exit code (and errors on stderr) are the result")
     args = p.parse_args(argv)
     if args.scheme in ("slack", "zoom") and not args.timestamp:
         p.error(f"--scheme {args.scheme} requires --timestamp (the request timestamp header)")
@@ -339,8 +352,11 @@ def main(argv=None):
         ok, notes = VERIFIERS[args.scheme](payload, args.secret, args.signature, timestamp=args.timestamp,
                                            webhook_id=args.webhook_id, url=args.url, tolerance=args.tolerance)
 
-    if args.json:
-        print(json.dumps({"version": __version__, "scheme": args.scheme, "valid": ok,
+    if args.quiet:
+        pass
+    elif args.json:
+        print(json.dumps({"schema_version": 1, "tool": "webhook-sig-verifier", "version": __version__,
+                          "exit_code": 0 if ok else 1, "scheme": args.scheme, "valid": ok,
                           "notes": [n for n in notes if not n.startswith("WARNING")],
                           "warnings": [n for n in notes if n.startswith("WARNING")],
                           "payload_bytes": len(payload)}, indent=2))

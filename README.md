@@ -29,7 +29,7 @@ computation, so it's safe to run against real production secrets on an air-gappe
 
 ```sh
 pipx install git+https://git.canutethegreat.com/CanuteTheGreat/webhook-sig-verifier.git        # latest release branch; puts `webhook-sig-verifier` on PATH
-pipx install git+https://git.canutethegreat.com/CanuteTheGreat/webhook-sig-verifier.git@v1.2.0  # a pinned release
+pipx install git+https://git.canutethegreat.com/CanuteTheGreat/webhook-sig-verifier.git@v1.3.0  # a pinned release
 brew install canutethegreat/errant-tools/webhook-sig-verifier   # after: brew tap canutethegreat/errant-tools https://git.canutethegreat.com/CanuteTheGreat/homebrew-errant-tools
 scoop install errant-tools/webhook-sig-verifier                 # after: scoop bucket add errant-tools https://git.canutethegreat.com/CanuteTheGreat/scoop-errant-tools
 ```
@@ -63,10 +63,12 @@ webhook-sig-verifier --scheme generic-sha256 --encoding base64 --json \
     --secret "mysecret" --payload-file payload.json --signature "q1MK..."
 ```
 
-Exit code `0` = valid, `1` = invalid (mismatched), `2` = usage error (e.g. Slack
+Exit codes (the shared Errant Solutions CLI contract, see [docs/CLI-CONTRACT.md](docs/CLI-CONTRACT.md)): `0` = valid, `1` = invalid (mismatched), `2` = usage error (e.g. Slack
 without `--timestamp`, Square/Twilio without `--url`, both `--payload` and
-`--payload-file`, unreadable file). `--json` prints `{"valid", "scheme", "notes",
-"warnings", "payload_bytes"}`. Python 3.7+.
+`--payload-file`, unreadable file), `3` = unexpected runtime error. `--json` prints `{"schema_version", "tool", "version",
+"exit_code", "valid", "scheme", "notes", "warnings", "payload_bytes"}`; `schema_version` is currently 1 and its JSON Schema is
+[schema/webhook-sig-verifier.schema.json](schema/webhook-sig-verifier.schema.json). `--quiet` (`-q`) prints nothing on stdout,
+so the exit code is the whole answer; errors always go to stderr. Python 3.7+.
 
 Read the payload from a file with `--payload-file exact-body.json` to
 guarantee byte-for-byte fidelity (whitespace/encoding differences are the
